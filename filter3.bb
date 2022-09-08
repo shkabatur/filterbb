@@ -1,6 +1,3 @@
-(require '[babashka.fs :as fs]
-         '[clojure.tools.reader.edn :as edn])
-
 (def nginx-config (slurp (first *command-line-args*)))
 
 (defn to-map [[name servers]]
@@ -15,7 +12,7 @@
 
 (def upstreams 
  (->> nginx-config
-      (re-seq #".*upstream\s+(.*)\{([^\}]+)\}")
+      (re-seq #".*upstream\s+(.*)\{([^\}]+)\}") ;; Вытаскиваем имя и тело апстрима
       (map rest)
       (map to-map)
       (reduce conj)))
@@ -39,7 +36,7 @@
 
 (defn parse-proxy [[file-name body]]
   (let [proxy (->> body
-		           (re-seq #"proxy_pass\s+http://([^/;\$]*)")
+		   (re-seq #"proxy_pass\s+http://([^/;\$]*)")
                    (map second)
                    distinct
                    (map str/trim)
