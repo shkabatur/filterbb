@@ -36,19 +36,19 @@
 
 (defn parse-proxy [[file-name body]]
   (let [proxy (->> body
-		   (re-seq #"proxy_pass\s+http://([^/;\$]*)")
+                   (re-seq #"proxy_pass\s+http://([^/;\$]*)")
                    (map second)
                    distinct
                    (map str/trim)
                    (map replace-by-body)
-				   (flatten))]
+                   (flatten))]
     (if (not-empty proxy)
-	  {file-name proxy}
-	  {})))
+        {file-name proxy}
+        {})))
 
 (->> parsed-config-files
      (map parse-proxy)
-	 (filter not-empty)
+     (filter not-empty)
      (reduce conj)
      pprint)
 
