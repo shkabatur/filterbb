@@ -17,7 +17,6 @@
       (map to-map)
       (reduce conj)))
 
-
 (def upstream-keys (keys upstreams))
 
 (def raw-config-files (->> (str/split nginx-config #"\#\s+configuration\s+file")
