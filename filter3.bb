@@ -1,7 +1,7 @@
 (require '[babashka.fs :as fs]
          '[clojure.tools.reader.edn :as edn])
 
-(def nginx-config (slurp "nginx/nginx_config_dump"))
+(def nginx-config (slurp (first *command-line-args*)))
 
 (defn to-map [[name servers]]
  (let [name (str/trim name)
