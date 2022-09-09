@@ -1,3 +1,6 @@
+(require '[babashka.fs :as fs]
+         '[clojure.tools.reader.edn :as edn])
+
 (def nginx-config (slurp (first *command-line-args*)))
 
 (defn to-map [[name servers]]
@@ -10,14 +13,13 @@
    servers (vec servers)]
    {name servers}))
 
-(def upstreams 
+(def upstreams
  (->> nginx-config
-      (re-seq #".*upstream\s+(.*)\{([^\}]+)\}") ;; Вытаскиваем имя и тело апстрима
+      (re-seq #".*upstream\s+(.*)\{([^\}]+)\}")
       (map rest)
       (map to-map)
       (reduce conj)))
 
-(def upstream-keys (keys upstreams))
 
 (def raw-config-files (->> (str/split nginx-config #"\#\s+configuration\s+file")
                            (filter not-empty)))
@@ -35,19 +37,21 @@
 
 (defn parse-proxy [[file-name body]]
   (let [proxy (->> body
-                   (re-seq #"proxy_pass\s+http://([^/;\$]*)")
+                           (re-seq #"proxy_pass\s+h?t?t?p?s?\:?/?/?([^/;\$]*)")
                    (map second)
+                                   (filter not-empty)
                    distinct
                    (map str/trim)
                    (map replace-by-body)
-                   (flatten))]
+                                   (flatten))]
     (if (not-empty proxy)
-        {file-name proxy}
-        {})))
+          {file-name proxy}
+          {})))
 
-(->> parsed-config-files
-     (map parse-proxy)
-     (filter not-empty)
-     (reduce conj)
-     pprint)
+(def result
+  (->> parsed-config-files
+       (map parse-proxy)
+       (filter not-empty)
+       (reduce conj)))
 
+(print (yaml/generate-string result :dumper-options {:flow-style :block :indent 6}))
