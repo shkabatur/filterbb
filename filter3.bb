@@ -54,4 +54,5 @@
        (filter not-empty)
        (reduce conj)))
 
-(print (yaml/generate-string result :dumper-options {:flow-style :block :indent 6}))
+
+(print (yaml/generate-string result :dumper-options {:flow-style :block :indicator-indent 3 :indent 6}))
